@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import 'screens/LoginPage.dart';
 import 'screens/HomePage.dart';
+import 'screens/MainInterface.dart';
 
 void main() => runApp(ComidaApp());
 
@@ -21,6 +22,7 @@ class ComidaApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),
         '/comida': (context) => ComidaScreen(),
+        '/MainInterface': (context) => const MainInterface(),
       },
     );
   }

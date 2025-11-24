@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async'; // timer
+import "MainInterface.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,6 +23,7 @@ class _LoginScreenState extends State<LoginPage> {
   final String correctEmail = "osopech@gmail.com";
   final String correctPassword = "12345";
 
+
   @override
   void dispose() {
     emailFocusNode.dispose();
@@ -38,8 +40,12 @@ class _LoginScreenState extends State<LoginPage> {
 
     if (email == correctEmail && password == correctPassword) {
       print("LOGIN ÉXITOSO");
+      Navigator.pushReplacementNamed(context, '/MainInterface');
     } else {
       print("LOGIN FALLIDO");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Credenciales incorrectas")),
+      );
     }
   }
 
