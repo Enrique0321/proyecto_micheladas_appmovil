@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import "../services/api_services.dart";
+
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -12,29 +16,65 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isConfirmPasswordVisible = false;
 
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController lastnameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController telefonoController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     nameController.dispose();
+    lastnameController.dispose();
     emailController.dispose();
+    telefonoController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _register() {
-    // Mock registration logic
+  // ============================================================
+  // CONEXIÓN AL BACKEND - REGISTER
+  // ============================================================
+  Future<bool> registerUser(
+      String nombre, String apellidos, String email, String telefono, String password) async {
+
+    final url = Uri.parse("localhost:3000/register");  
+    // IMPORTANTE: 10.0.2.2 funciona solo en emulador Android
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "nombre": nombre,
+        "apellidos": apellidos,
+        "email": email,
+        "telefono": telefono, // Default si no lo pides en UI
+        "password": password,
+      }),
+    );
+
+    if (response.statusCode != 200) return false;
+
+    final data = jsonDecode(response.body);
+    return data["ok"] == true;
+  }
+
+  // ============================================================
+  // FUNCIÓN REGISTER UI
+  // ============================================================
+  void _register() async {
     final name = nameController.text.trim();
+    final lastname = lastnameController.text.trim();
     final email = emailController.text.trim();
+    final telefono = telefonoController.text.trim();
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
     if (name.isEmpty ||
+        lastname.isEmpty ||
         email.isEmpty ||
+        telefono.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -56,20 +96,30 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // Success
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Registro exitoso"),
-        backgroundColor: Colors.green,
-      ),
-    );
-    Navigator.pop(context); // Go back to login
+    bool ok = await registerUser(name, lastname, email, telefono, password);
+
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Registro exitoso"),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context); // Regresa al Login
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Error al registrar. Intenta nuevamente."),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF9E2A1C), // Deep red background
+      backgroundColor: const Color(0xFF9E2A1C),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -77,17 +127,16 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo / Image
+                // Logo
                 Hero(
                   tag: 'app_logo',
                   child: SizedBox(
-                    height: 120, // Smaller logo for register
+                    height: 120,
                     child: Image.asset("asset/logo.png", fit: BoxFit.contain),
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // Title
                 const Text(
                   "Crear Cuenta",
                   style: TextStyle(
@@ -103,7 +152,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 30),
 
-                // Form Container
+                // Formulario
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -113,15 +162,27 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   child: Column(
                     children: [
-                      // Name Field
                       _buildTextField(
                         controller: nameController,
-                        hintText: "Nombre Completo",
+                        hintText: "Nombre (s)",
                         icon: Icons.person_outline,
                       ),
                       const SizedBox(height: 16),
 
-                      // Email Field
+                      _buildTextField(
+                        controller: lastnameController,
+                        hintText: "Apellidos",
+                        icon: Icons.person_outline,
+                      ),
+                      const SizedBox(height: 16),
+
+                      _buildTextField(
+                        controller: telefonoController,
+                        hintText: "Telefono",
+                        icon: Icons.phone_outlined,
+                      ),
+                      const SizedBox(height: 16),
+
                       _buildTextField(
                         controller: emailController,
                         hintText: "Correo Electrónico",
@@ -129,7 +190,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Password Field
                       _buildTextField(
                         controller: passwordController,
                         hintText: "Contraseña",
@@ -144,7 +204,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Confirm Password Field
                       _buildTextField(
                         controller: confirmPasswordController,
                         hintText: "Confirmar Contraseña",
@@ -160,7 +219,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 24),
 
-                      // Register Button
                       SizedBox(
                         width: double.infinity,
                         height: 55,
@@ -190,7 +248,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 20),
 
-                // Back to Login
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -220,6 +277,9 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  // ============================================================
+  // WIDGET GENERADOR DE TEXTFIELDS
+  // ============================================================
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,

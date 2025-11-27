@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import "../services/api_services.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -32,23 +33,27 @@ class _LoginScreenState extends State<LoginPage> {
     super.dispose();
   }
 
-  void validateLogin() {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+  // Validar login con API
 
-    if (email == correctEmail && password == correctPassword) {
-      print("LOGIN ÉXITOSO");
-      Navigator.pushReplacementNamed(context, '/MainInterface');
-    } else {
-      print("LOGIN FALLIDO");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Credenciales incorrectas"),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    }
+  void validateLogin() async {
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
+
+  final response = await ApiService.login(email, password);
+
+  if (response["success"] == true) {
+    print("LOGIN ÉXITOSO");
+    Navigator.pushReplacementNamed(context, '/MainInterface');
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(response["message"] ?? "Error en servidor"),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
