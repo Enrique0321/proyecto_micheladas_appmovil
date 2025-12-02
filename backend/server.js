@@ -19,40 +19,40 @@ app.use((err, req, res, next) => {
 
 // CONFIGURACIÓN DE LA CONEXIÓN A MYSQL (Workbench)
 const db = mysql.createConnection({
-    // CONFIGURACIÓN DE LA CONEXIÓN A MYSQL
-    host: '127.0.0.1',      
-    port: 3306,             
-    user: 'root',           
-    password: '', // 
-    database: 'micheladas_app'   // Asegúrate de que este SCHEMA exista en Workbench
+  // CONFIGURACIÓN DE LA CONEXIÓN A MYSQL
+  host: '127.0.0.1',
+  port: 3306,
+  user: 'root',
+  password: '', // 
+  database: 'micheladas_app'   // Asegúrate de que este SCHEMA exista en Workbench
 });
 
 
 // Probar conexión
 db.connect(err => {
-    if (err) {
-        console.log('❌ Error al conectar a MySQL:', err);
-        return;
-    }
-    console.log('✅ Conectado a la base de datos MySQL');
+  if (err) {
+    console.log('❌ Error al conectar a MySQL:', err);
+    return;
+  }
+  console.log('✅ Conectado a la base de datos MySQL');
 });
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('Servidor funcionando y conectado a MySQL');
+  res.send('Servidor funcionando y conectado a MySQL');
 });
 
 
 // Ruta de registro de usuario
 app.post('/register', (req, res) => {
-    const { nombre, apellidos, email, telefono, password } = req.body;
-    const sql = "INSERT INTO users (nombre, apellidos, email, telefono, password) VALUES (?, ?, ?, ?, ?)";
-    db.query(sql, [nombre, apellidos, email, telefono, password], (err, result) => {
-        if (err) {
-            return res.status(500).json({ ok: false, error: err.message });
-        }
-        res.json({ ok: true, success: true, message: 'Usuario registrado exitosamente', id: result.insertId });
-    });
+  const { nombre, apellidos, email, telefono, password } = req.body;
+  const sql = "INSERT INTO users (nombre, apellidos, email, telefono, password) VALUES (?, ?, ?, ?, ?)";
+  db.query(sql, [nombre, apellidos, email, telefono, password], (err, result) => {
+    if (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+    res.json({ ok: true, success: true, message: 'Usuario registrado exitosamente', id: result.insertId });
+  });
 });
 
 
@@ -85,7 +85,7 @@ app.post("/login", (req, res) => {
 
 // Iniciar servidor
 app.listen(port, () => {
-    console.log(`\n✅ Servidor iniciado en http://localhost:${port}\n`);
+  console.log(`\n✅ Servidor iniciado en http://localhost:${port}\n`);
 });
 
 

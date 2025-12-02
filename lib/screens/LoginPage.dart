@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import "../services/api_services.dart";
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -36,23 +37,30 @@ class _LoginScreenState extends State<LoginPage> {
   // Validar login con API
 
   void validateLogin() async {
-  final email = emailController.text.trim();
-  final password = passwordController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
-  final response = await ApiService.login(email, password);
+    final response = await ApiService.login(email, password);
 
-  if (response["success"] == true) {
-    print("LOGIN ÉXITOSO");
-    Navigator.pushReplacementNamed(context, '/MainInterface');
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(response["message"] ?? "Error en servidor"),
-        backgroundColor: Colors.redAccent,
-      ),
-    );
+    if (response["success"] == true) {
+      print("LOGIN ÉXITOSO");
+      
+      // Guardar nombre de usuario
+      final prefs = await SharedPreferences.getInstance();
+      if (response["user"] != null && response["user"]["nombre"] != null) {
+        await prefs.setString('userName', response["user"]["nombre"]);
+      }
+
+      Navigator.pushReplacementNamed(context, '/MainInterface');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response["message"] ?? "Error en servidor"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
-}
 
 
   @override

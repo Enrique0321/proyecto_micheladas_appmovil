@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_micheladas_appmovil/screens/MainInterface.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -47,7 +48,14 @@ class HomeTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                   Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MainInterface(initialPage: 1),
+                  ),
+                );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber,
                     foregroundColor: Colors.white,

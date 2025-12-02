@@ -4,6 +4,7 @@ import 'package:proyecto_micheladas_appmovil/screens/RegisterPage.dart';
 
 import 'screens/LoginPage.dart';
 import 'screens/MainInterface.dart';
+import 'tab/menu.dart';
 
 void main() => runApp(ComidaApp());
 
@@ -20,6 +21,7 @@ class ComidaApp extends StatelessWidget {
         '/MainInterface': (context) => const MainInterface(),
         '/register': (context) => const RegisterPage(),
         '/bruto': (context) => const ForgotPasswordPage(),
+        '/menu': (context) => const MenuTab(), 
       },
     );
   }
