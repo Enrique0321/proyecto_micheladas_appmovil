@@ -6,7 +6,21 @@ import 'screens/LoginPage.dart';
 import 'screens/MainInterface.dart';
 import 'tab/menu.dart';
 
-void main() => runApp(ComidaApp());
+import 'package:provider/provider.dart';
+import 'package:proyecto_micheladas_appmovil/services/cart_service.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartService()),
+      ],
+      child: ComidaApp(),
+    ),
+  );
+}
 
 class ComidaApp extends StatelessWidget {
   @override

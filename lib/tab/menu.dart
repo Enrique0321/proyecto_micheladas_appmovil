@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:proyecto_micheladas_appmovil/services/cart_service.dart';
 
 class MenuTab extends StatelessWidget {
   const MenuTab({super.key});
@@ -49,6 +51,7 @@ class MenuTab extends StatelessWidget {
                             ),
                           ),
                           _buildMenuItem(
+                            context: context,
                             title: "Michelada Clasica",
                             description:
                                 "Producto: Sabor original y artesanal con retoque picosito",
@@ -57,6 +60,7 @@ class MenuTab extends StatelessWidget {
                             imageAsset: "asset/michelada_clasica.png",
                           ),
                           _buildMenuItem(
+                            context: context,
                             title: "Michelada Tamarindo",
                             description:
                                 "Producto: Sabor original y artesanal con sabor a Tamarindo",
@@ -65,6 +69,7 @@ class MenuTab extends StatelessWidget {
                             imageAsset: "asset/michelada_tamarindo.png",
                           ),
                           _buildMenuItem(
+                            context: context,
                             title: "Michelada Mango",
                             description:
                                 "Producto: Sabor original y artesanal con sabor a mango",
@@ -73,6 +78,7 @@ class MenuTab extends StatelessWidget {
                             imageAsset: "asset/michelada_mango.png",
                           ),
                           _buildMenuItem(
+                            context: context,
                             title: "Michelada habanero",
                             description:
                                 "Producto: Sabor original y artesanal sabor a chile a habanero",
@@ -101,6 +107,7 @@ class MenuTab extends StatelessWidget {
                             ),
                           ),
                           _buildMenuItem(
+                            context: context,
                             title: "Daiquirys",
                             description:
                                 "Producto: Coctel sin alcohol de sabor mango",
@@ -109,6 +116,7 @@ class MenuTab extends StatelessWidget {
                             imageAsset: "asset/daiquiri.png",
                           ),
                           _buildMenuItem(
+                            context: context,
                             title: "Piña coladas",
                             description:
                                 "Producto: Coctel sin alcohol de sabor piña con trozos de coco",
@@ -117,6 +125,7 @@ class MenuTab extends StatelessWidget {
                             imageAsset: "asset/pina_colada.png",
                           ),
                           _buildMenuItem(
+                            context: context,
                             title: "Azulitos",
                             description:
                                 "Producto: Preparado con refresco con energizante al gusto",
@@ -125,6 +134,7 @@ class MenuTab extends StatelessWidget {
                             imageAsset: "asset/azulito.png",
                           ),
                           _buildMenuItem(
+                            context: context,
                             title: "Medios y Litros",
                             description:
                                 "Producto: Concentrado de michelada con complementos",
@@ -148,6 +158,7 @@ class MenuTab extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
+    required BuildContext context,
     required String title,
     required String description,
     required String price,
@@ -234,7 +245,40 @@ class MenuTab extends StatelessWidget {
                 ],
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Parse price (remove $ and take first if multi)
+                  double parsedPrice = 0.0;
+                  try {
+                    String priceStr = price.replaceAll('\$', '').trim();
+                    if (isMultiPrice) {
+                      // Take the first price for simplicity or handle selection
+                      // For now, just taking the first number found
+                       final match = RegExp(r'\d+').firstMatch(priceStr);
+                       if (match != null) {
+                         parsedPrice = double.parse(match.group(0)!);
+                       }
+                    } else {
+                      parsedPrice = double.parse(priceStr);
+                    }
+                  } catch (e) {
+                    print("Error parsing price: $e");
+                  }
+
+                  Provider.of<CartService>(context, listen: false).addItem(
+                    title, // Using title as ID for simplicity
+                    title,
+                    parsedPrice,
+                    imageAsset,
+                  );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('$title agregado al carrito'),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6B6B), // Salmon color
                   foregroundColor: Colors.white,
