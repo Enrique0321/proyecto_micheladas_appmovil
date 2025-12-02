@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import "../services/api_services.dart";
 
 
@@ -39,25 +37,9 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<bool> registerUser(
       String nombre, String apellidos, String email, String telefono, String password) async {
 
-    final url = Uri.parse("localhost:3000/register");  
-    // IMPORTANTE: 10.0.2.2 funciona solo en emulador Android
+    final response = await ApiService.register(nombre, apellidos, email, telefono, password);
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "nombre": nombre,
-        "apellidos": apellidos,
-        "email": email,
-        "telefono": telefono, // Default si no lo pides en UI
-        "password": password,
-      }),
-    );
-
-    if (response.statusCode != 200) return false;
-
-    final data = jsonDecode(response.body);
-    return data["ok"] == true;
+    return response["ok"] == true && response["success"] == true;
   }
 
   // ============================================================

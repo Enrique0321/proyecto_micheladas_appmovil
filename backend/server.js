@@ -2,12 +2,20 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const port = 3306;
+const port = process.env.PORT || 3000;
 
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Middleware para manejar JSON malformado
+app.use((err, req, res, next) => {
+  if (err && err.type === 'entity.parse.failed') {
+    return res.status(400).json({ ok: false, error: 'JSON malformado en el body' });
+  }
+  next(err);
+});
 
 // CONFIGURACIÓN DE LA CONEXIÓN A MYSQL (Workbench)
 const db = mysql.createConnection({
@@ -38,12 +46,12 @@ app.get('/', (req, res) => {
 // Ruta de registro de usuario
 app.post('/register', (req, res) => {
     const { nombre, apellidos, email, telefono, password } = req.body;
-    const sql = "INSERT INTO users (nombre,apellidos, email, telefono, password ) VALUES (?, ?, ?)";
-    db.query(sql, [name, email, password], (err, result) => {
+    const sql = "INSERT INTO users (nombre, apellidos, email, telefono, password) VALUES (?, ?, ?, ?, ?)";
+    db.query(sql, [nombre, apellidos, email, telefono, password], (err, result) => {
         if (err) {
-            return res.status(500).json({ error: err });
+            return res.status(500).json({ ok: false, error: err.message });
         }
-        res.json({ ok: true, message: 'Usuario registrado exitosamente' });
+        res.json({ ok: true, success: true, message: 'Usuario registrado exitosamente', id: result.insertId });
     });
 });
 
@@ -60,13 +68,13 @@ app.post("/login", (req, res) => {
     [email, password],
     (err, result) => {
       if (err) {
-        return res.status(500).json({ error: err });
+        return res.status(500).json({ ok: false, success: false, error: err.message });
       }
 
       if (result.length > 0) {
-        res.json({ ok: true, user: result[0] });
+        res.json({ ok: true, success: true, user: result[0], message: 'Login exitoso' });
       } else {
-        res.json({ ok: false, message: "Credenciales incorrectas" });
+        res.json({ ok: false, success: false, message: "Credenciales incorrectas" });
       }
     }
   );
@@ -76,8 +84,8 @@ app.post("/login", (req, res) => {
 
 
 // Iniciar servidor
-app.listen(3000, () => {
-    console.log('Servidor iniciado en http://localhost:3000');
+app.listen(port, () => {
+    console.log(`\n✅ Servidor iniciado en http://localhost:${port}\n`);
 });
 
 
