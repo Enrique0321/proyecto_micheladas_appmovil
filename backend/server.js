@@ -43,7 +43,7 @@ const db = mysql.createConnection({
   host: '127.0.0.1',
   port: 3306,
   user: 'root',
-  password: 'kiko', // 
+  //password: 'kiko', // 
   database: 'micheladas_appmovil'   // Asegúrate de que este SCHEMA exista en Workbench
 });
 
