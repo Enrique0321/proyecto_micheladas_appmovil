@@ -1,164 +1,126 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:proyecto_micheladas_appmovil/services/cart_service.dart';
+import 'package:proyecto_micheladas_appmovil/services/api_services.dart';
 
-class MenuTab extends StatelessWidget {
+class MenuTab extends StatefulWidget {
   const MenuTab({super.key});
+
+  @override
+  State<MenuTab> createState() => _MenuTabState();
+}
+
+class _MenuTabState extends State<MenuTab> {
+  List<dynamic> products = [];
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProducts();
+  }
+
+  Future<void> _fetchProducts() async {
+    try {
+      final fetchedProducts = await ApiService.getProducts();
+      setState(() {
+        products = fetchedProducts;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFF121212), // Dark background
-      child: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 30.0),
-              child: Text(
-                "Menu de Super Mentadas Micheladas",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  
-                  fontFamily: 'Arial',
-                ),
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Left Column: Micheladas
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 16.0, left: 8.0),
-                            child: Text(
-                              "Micheladas",
-                              style: TextStyle(
-                                color: Colors.amber,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+      child: isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.amber))
+          : errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: Colors.red, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Error al cargar productos",
+                        style: const TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                      Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.white54),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _fetchProducts,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber),
+                        child: const Text("Reintentar",
+                            style: TextStyle(color: Colors.black)),
+                      )
+                    ],
+                  ),
+                )
+              : CustomScrollView(
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 30.0),
+                        child: Text(
+                          "Menu de Super Mentadas Micheladas",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Arial',
                           ),
-                          _buildMenuItem(
-                            context: context,
-                            title: "Michelada Clasica",
-                            description:
-                                "Producto: Sabor original y artesanal con retoque picosito",
-                            price: "\$30",
-                            originalPrice: "\$35",
-                            imageAsset: "asset/michelada_clasica.png",
-                          ),
-                          _buildMenuItem(
-                            context: context,
-                            title: "Michelada Tamarindo",
-                            description:
-                                "Producto: Sabor original y artesanal con sabor a Tamarindo",
-                            price: "\$30",
-                            originalPrice: "\$35",
-                            imageAsset: "asset/michelada_tamarindo.png",
-                          ),
-                          _buildMenuItem(
-                            context: context,
-                            title: "Michelada Mango",
-                            description:
-                                "Producto: Sabor original y artesanal con sabor a mango",
-                            price: "\$30",
-                            originalPrice: "\$35",
-                            imageAsset: "asset/michelada_mango.png",
-                          ),
-                          _buildMenuItem(
-                            context: context,
-                            title: "Michelada habanero",
-                            description:
-                                "Producto: Sabor original y artesanal sabor a chile a habanero",
-                            price: "\$30",
-                            originalPrice: "\$35",
-                            imageAsset: "asset/michelada_habanero.png",
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    // Right Column: Fuera de contexto
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 16.0, left: 8.0),
-                            child: Text(
-                              "Fuera de contexto",
-                              style: TextStyle(
-                                color: Colors.amber,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          _buildMenuItem(
-                            context: context,
-                            title: "Daiquirys",
-                            description:
-                                "Producto: Coctel sin alcohol de sabor mango",
-                            price: "\$40",
-                            originalPrice: "\$50",
-                            imageAsset: "asset/daiquiri.png",
-                          ),
-                          _buildMenuItem(
-                            context: context,
-                            title: "Piña coladas",
-                            description:
-                                "Producto: Coctel sin alcohol de sabor piña con trozos de coco",
-                            price: "\$40",
-                            originalPrice: "\$50",
-                            imageAsset: "asset/pina_colada.png",
-                          ),
-                          _buildMenuItem(
-                            context: context,
-                            title: "Azulitos",
-                            description:
-                                "Producto: Preparado con refresco con energizante al gusto",
-                            price: "\$40",
-                            originalPrice: "\$50",
-                            imageAsset: "asset/azulito.png",
-                          ),
-                          _buildMenuItem(
-                            context: context,
-                            title: "Medios y Litros",
-                            description:
-                                "Producto: Concentrado de michelada con complementos",
-                            price: "Medio \$75\nLitro \$130",
-                            originalPrice: "",
-                            imageAsset: "asset/medios_litros.png",
-                            isMultiPrice: true,
-                          ),
-                        ],
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final product = products[index];
+                            return _buildMenuItem(
+                              context: context,
+                              productId: product['id'].toString(), // Pass ID
+                              title: product['name'] ?? 'Producto',
+                              description:
+                                  product['description'] ?? 'Sin descripción',
+                              price: "\$${product['price']}",
+                              originalPrice: "", 
+                              imageAsset: (product['image'] != null && product['image'].toString().isNotEmpty)
+                                  ? "images/${product['image']}"
+                                  : "",
+                            ); 
+                                  
+                          
+                          },
+                          childCount: products.length,
+                        ),
                       ),
                     ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 40)),
                   ],
                 ),
-              ]),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
-        ],
-      ),
     );
   }
 
   Widget _buildMenuItem({
     required BuildContext context,
+    required String productId, // Add productId
     required String title,
     required String description,
     required String price,
@@ -188,7 +150,19 @@ class MenuTab extends StatelessWidget {
                   color: Colors.grey[900],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.local_drink, color: Colors.white),
+                child: imageAsset.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          imageAsset,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.broken_image,
+                                color: Colors.white);
+                          },
+                        ),
+                      )
+                    : const Icon(Icons.local_drink, color: Colors.white),
               ),
               const SizedBox(width: 8),
               // Text Content
@@ -251,8 +225,6 @@ class MenuTab extends StatelessWidget {
                   try {
                     String priceStr = price.replaceAll('\$', '').trim();
                     if (isMultiPrice) {
-                      // Take the first price for simplicity or handle selection
-                      // For now, just taking the first number found
                        final match = RegExp(r'\d+').firstMatch(priceStr);
                        if (match != null) {
                          parsedPrice = double.parse(match.group(0)!);
@@ -265,7 +237,7 @@ class MenuTab extends StatelessWidget {
                   }
 
                   Provider.of<CartService>(context, listen: false).addItem(
-                    title, // Using title as ID for simplicity
+                    productId, // Use actual product ID
                     title,
                     parsedPrice,
                     imageAsset,

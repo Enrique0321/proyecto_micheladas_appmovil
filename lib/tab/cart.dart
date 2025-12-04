@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:proyecto_micheladas_appmovil/services/cart_service.dart';
+import 'package:proyecto_micheladas_appmovil/services/stripe_service.dart';
+import 'package:proyecto_micheladas_appmovil/services/api_services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartTab extends StatelessWidget {
   const CartTab({super.key});
@@ -134,12 +137,50 @@ class CartTab extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // Implement checkout logic
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("Procesando pedido...")),
+                          onPressed: () async {
+                            final success = await StripeService.makePayment(
+                              context,
+                              cart.totalAmount.toString(),
+                              'USD',
                             );
+
+                            if (success) {
+                              // Get User ID
+                              final prefs = await SharedPreferences.getInstance();
+                              final userId = prefs.getInt('userId');
+
+                              if (userId != null) {
+                                // Create order items list
+                                final items = cart.items.map((item) => {
+                                  'productId': item.id, // Send ID as productId
+                                  'quantity': item.quantity,
+                                  'price': item.price,
+                                }).toList();
+
+                                // Save order to DB
+                                final response = await ApiService.createOrder(
+                                  userId,
+                                  cart.totalAmount,
+                                  items,
+                                );
+
+                                if (response['success'] == true) {
+                                  // Clear cart
+                                  cart.clearCart();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Pedido guardado exitosamente')),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error al guardar pedido: ${response['message']}')),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Error: Usuario no identificado. Por favor inicia sesión nuevamente.')),
+                                );
+                              }
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber,

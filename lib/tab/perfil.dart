@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:proyecto_micheladas_appmovil/screens/OrderHistoryPage.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -22,7 +23,7 @@ class _ProfileTabState extends State<ProfileTab> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('userName') ?? "Usuario Demo";
-      // If you save email later, load it here too
+      userEmail = prefs.getString('userEmail') ?? "usuario@micheladas.com";
     });
   }
 
@@ -30,8 +31,51 @@ class _ProfileTabState extends State<ProfileTab> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all data
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/LoginPage');
+      Navigator.pushReplacementNamed(context, '/login');
     }
+  }
+
+  Future<void> _editProfile() async {
+    TextEditingController nameController = TextEditingController(text: userName);
+    
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2C2C2C),
+        title: const Text("Editar Perfil", style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: nameController,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            labelText: "Nombre",
+            labelStyle: TextStyle(color: Colors.amber),
+            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
+            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar", style: TextStyle(color: Colors.white70)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newName = nameController.text.trim();
+              if (newName.isNotEmpty) {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('userName', newName);
+                setState(() {
+                  userName = newName;
+                });
+                Navigator.pop(context);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+            child: const Text("Guardar", style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -80,27 +124,17 @@ class _ProfileTabState extends State<ProfileTab> {
           _buildProfileOption(
             icon: Icons.person,
             title: "Editar Perfil",
-            onTap: () {},
+            onTap: _editProfile,
           ),
           _buildProfileOption(
             icon: Icons.shopping_bag,
             title: "Mis Pedidos",
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.location_on,
-            title: "Direcciones de Entrega",
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.payment,
-            title: "Métodos de Pago",
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.settings,
-            title: "Configuración",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const OrderHistoryPage()),
+              );
+            },
           ),
           const SizedBox(height: 20),
           _buildProfileOption(

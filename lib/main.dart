@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:proyecto_micheladas_appmovil/screens/ForgotPasswordPage.dart';
 import 'package:proyecto_micheladas_appmovil/screens/RegisterPage.dart';
 
@@ -11,6 +12,11 @@ import 'package:proyecto_micheladas_appmovil/services/cart_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    Stripe.publishableKey = 'pk_test_51ROJOiRIALrMjp8dh4iSQATcQVDUbDm11oa9d0sgU1MwxoQ9c8ELDs4FUyLzNJDjqorp0eUxv2iFDDPcekCQ8F1V00H44NX4s6';
+  } catch (e) {
+    print("Error initializing Stripe: $e");
+  }
 
   runApp(
     MultiProvider(

@@ -45,10 +45,18 @@ class _LoginScreenState extends State<LoginPage> {
     if (response["success"] == true) {
       print("LOGIN ÉXITOSO");
       
-      // Guardar nombre de usuario
+      // Guardar nombre de usuario, email y ID
       final prefs = await SharedPreferences.getInstance();
-      if (response["user"] != null && response["user"]["nombre"] != null) {
-        await prefs.setString('userName', response["user"]["nombre"]);
+      if (response["user"] != null) {
+        if (response["user"]["nombre"] != null) {
+          await prefs.setString('userName', response["user"]["nombre"]);
+        }
+        if (response["user"]["email"] != null) {
+          await prefs.setString('userEmail', response["user"]["email"]);
+        }
+        if (response["user"]["id"] != null) {
+          await prefs.setInt('userId', response["user"]["id"]);
+        }
       }
 
       Navigator.pushReplacementNamed(context, '/MainInterface');
